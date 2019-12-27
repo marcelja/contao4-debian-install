@@ -80,3 +80,30 @@ sudo apt -y install unzip
 /sbin/swapon /var/swap.1
 
 su - contao -c "composer create-project --no-dev contao/managed-edition contaoproject"
+
+# https://websiteforstudents.com/install-contao-cms-on-ubuntu-16-04-lts-with-apache2-mariadb-and-php-7-1-support/
+ipaddress=$(curl ifconfig.me)
+echo "<VirtualHost *:80>
+     ServerAdmin admin@example.com
+     DocumentRoot /home/contao/contaoproject/web
+     ServerName $ipaddress
+     ServerAlias $ipaddress
+
+     <Directory /home/contao/contaoproject/web/>
+        Options +FollowSymlinks
+        AllowOverride All
+        Require all granted
+     </Directory>
+
+     ErrorLog ${APACHE_LOG_DIR}/error.log
+     CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>" > /etc/apache2/sites-available/contao.conf
+
+sudo chown -R www-data:www-data contaoproject/
+sudo chmod -R 755 contaoproject
+sudo a2ensite contao.conf
+sudo a2enmod rewrite
+sudo systemctl restart apache2.service
+
+echo "Install script done, now open: http://$ipaddress/contao/install"
