@@ -1,8 +1,9 @@
 #!/bin/bash
 
-read -s -p "Enter contao/mysql user password: " password
-echo -e "\n"
-
+password=$(openssl rand -base64 14)
+echo "The contao/mysql user password: $password"
+echo "The install script will continue in 10 seconds"
+sleep 10
 if [ $(id -u) -eq 0 ]; then
     pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
     useradd -m -p $pass contao -s /bin/bash
@@ -72,4 +73,10 @@ curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
 
 sudo apt -y install unzip
+
+# https://github.com/composer/composer/issues/945#issuecomment-8552757
+/bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+/sbin/mkswap /var/swap.1
+/sbin/swapon /var/swap.1
+
 su - contao -c "composer create-project --no-dev contao/managed-edition contaoproject"
