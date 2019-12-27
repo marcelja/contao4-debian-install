@@ -1,6 +1,7 @@
 #!/bin/bash
 
 read -s -p "Enter contao/mysql user password: " password
+echo -e "\n"
 
 if [ $(id -u) -eq 0 ]; then
     pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
@@ -50,6 +51,19 @@ sudo apt install php7.2 libapache2-mod-php7.2 php7.2-common php7.2-mbstring php7
 
 # https://stackoverflow.com/a/2464883/5203308
 sudo sed -i "s/\(max_execution_time *= *\).*/\1180/" /etc/php/7.2/apache2/php.ini
-sudo sed -i "s/\(memory_limit *= *\).*/\1256M/" /etc/php/7.2/apache2/php.ini
+sudo sed -i "s/\(memory_limit *= *\).*/\1512M/" /etc/php/7.2/apache2/php.ini
 sudo sed -i "s/\(post_max_size *= *\).*/\120M/" /etc/php/7.2/apache2/php.ini
 sudo sed -i "s/\(upload_max_filesize *= *\).*/\1100M/" /etc/php/7.2/apache2/php.ini
+
+sudo mysql --user=root <<_EOF_
+CREATE DATABASE contaodb;
+CREATE USER 'contaouser'@'localhost' IDENTIFIED BY '${password}';
+GRANT ALL ON contaodb.* TO 'contaouser'@'localhost' IDENTIFIED BY '${password}' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+_EOF_
+
+if ! grep -q "innodb_large_prefix" /etc/mysql/mariadb.conf.d/50-server.cnf; then
+    sudo sed  -i '/\[mysqld\]/a innodb_large_prefix = 1\ninnodb_file_format = Barracuda\ninnodb_file_per_table = 1\n' /etc/mysql/mariadb.conf.d/50-server.cnf
+fi
+
+sudo systemctl restart mysql.service
