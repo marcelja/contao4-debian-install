@@ -55,6 +55,7 @@ sudo sed -i "s/\(memory_limit *= *\).*/\1512M/" /etc/php/7.2/apache2/php.ini
 sudo sed -i "s/\(post_max_size *= *\).*/\120M/" /etc/php/7.2/apache2/php.ini
 sudo sed -i "s/\(upload_max_filesize *= *\).*/\1100M/" /etc/php/7.2/apache2/php.ini
 
+# https://websiteforstudents.com/install-contao-cms-on-ubuntu-16-04-lts-with-apache2-mariadb-and-php-7-1-support/
 sudo mysql --user=root <<_EOF_
 CREATE DATABASE contaodb;
 CREATE USER 'contaouser'@'localhost' IDENTIFIED BY '${password}';
