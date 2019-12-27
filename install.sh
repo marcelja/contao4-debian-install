@@ -7,7 +7,6 @@ if [ $(id -u) -eq 0 ]; then
     pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
     useradd -m -p $pass contao -s /bin/bash
     usermod -aG sudo contao
-    su -l contao
 fi
 
 cd /home/contao
@@ -47,7 +46,7 @@ sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gp
 echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
 
 sudo apt update
-sudo apt install php7.2 libapache2-mod-php7.2 php7.2-common php7.2-mbstring php7.2-xmlrpc php7.2-soap php7.2-gd php7.2-xml php7.2-intl php7.2-mysql php7.2-cli php7.2-zip php7.2-curl
+sudo apt -y install php7.2 libapache2-mod-php7.2 php7.2-common php7.2-mbstring php7.2-xmlrpc php7.2-soap php7.2-gd php7.2-xml php7.2-intl php7.2-mysql php7.2-cli php7.2-zip php7.2-curl
 
 # https://stackoverflow.com/a/2464883/5203308
 sudo sed -i "s/\(max_execution_time *= *\).*/\1180/" /etc/php/7.2/apache2/php.ini
@@ -68,3 +67,9 @@ if ! grep -q "innodb_large_prefix" /etc/mysql/mariadb.conf.d/50-server.cnf; then
 fi
 
 sudo systemctl restart mysql.service
+
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+sudo apt -y install unzip
+su - contao -c "composer create-project --no-dev contao/managed-edition contaoproject"
