@@ -13,6 +13,7 @@ fi
 cd /home/contao
 mkdir -p .ssh
 touch .ssh/authorized_keys
+chown -R contao:contao .ssh
 
 sudo apt update
 sudo apt -y install apache2
